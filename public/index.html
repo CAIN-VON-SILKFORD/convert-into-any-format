@@ -50,7 +50,7 @@ const {PDFDocument,degrees,rgb,StandardFonts}=PDFLib;
 const PDF=".pdf",IMG=".jpg,.jpeg,.png,.webp",DOC=".doc,.docx",XLS=".xls,.xlsx",PPT=".ppt,.pptx";
 const T=[
 ["Compress","🗜️",[["compress","Compress PDF","Shrink file size",PDF,0,"opt:quality"]]],
-["Convert","🔄",[["converter","PDF Converter","Any to any format"],["ocr","PDF OCR","Make scans searchable"],["pdfa","PDF to PDF/A","Archive format"]]],
+["Convert","🔄",[["converter","PDF Converter","Pick a file, then a format",".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.jpg,.jpeg,.png,.webp",0,"conv"],["ocr","PDF OCR","Make scans searchable"],["pdfa","PDF to PDF/A","Archive format"]]],
 ["PDF to Image","🖼️",[["pdf-to-jpg","PDF to JPG","Pages as JPG",PDF,0,"img:jpeg"],["pdf-to-png","PDF to PNG","Pages as PNG",PDF,0,"img:png"]]],
 ["Image to PDF","📷",[["jpg-to-pdf","JPG to PDF","JPG, PNG, WebP to PDF",IMG,1,"pdf-from-img"]]],
 ["PDF to Office","📄",[["pdf-to-word","PDF to Word","Editable .docx",PDF,0,"api"],["pdf-to-excel","PDF to Excel","Tables to .xlsx"],["pdf-to-ppt","PDF to PPT","Slides",PDF,0,"api"]]],
@@ -64,7 +64,8 @@ const T=[
 ];
 const tools={};T.forEach(([c,i,l])=>l.forEach(t=>tools[t[0]]={id:t[0],name:t[1],d:t[2],acc:t[3],multi:t[4],op:t[5],cat:c,icon:i}));
 const $=s=>document.querySelector(s),app=$("#app");
-let files=[],results=[];
+let files=[],results=[],pend=null;
+const CONV={".pdf":[["pdf-to-word","Word (.docx)"],["pdf-to-ppt","PowerPoint (.pptx)"],["pdf-to-jpg","JPG images"],["pdf-to-png","PNG images"]],".doc":[["word-to-pdf","PDF"]],".docx":[["word-to-pdf","PDF"]],".xls":[["excel-to-pdf","PDF"]],".xlsx":[["excel-to-pdf","PDF"]],".ppt":[["ppt-to-pdf","PDF"]],".pptx":[["ppt-to-pdf","PDF"]],".odt":[["odt-to-pdf","PDF"]],".ods":[["ods-to-pdf","PDF"]],".odp":[["odp-to-pdf","PDF"]],".jpg":[["jpg-to-pdf","PDF"]],".jpeg":[["jpg-to-pdf","PDF"]],".png":[["jpg-to-pdf","PDF"]],".webp":[["jpg-to-pdf","PDF"]]};
 $("#th").onclick=()=>{const r=document.documentElement,d=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme:dark)").matches);r.dataset.theme=d?"light":"dark";try{localStorage.setItem("th",r.dataset.theme)}catch(e){}};
 try{const s=localStorage.getItem("th");if(s)document.documentElement.dataset.theme=s}catch(e){}
 $("#sh").onclick=()=>{
@@ -90,9 +91,10 @@ function route(){
  if(id==="terms")return page(["Terms","Free to use, provided as is, with no warranty."]);
  if(id==="contact")return page(["Contact","Add your contact email here."]);
  const t=tools[id];if(!t)return home();
- if(!t.op){app.innerHTML=`<div class="panel"><h2 style="margin-top:0">${t.icon} ${t.name}</h2><p>This tool is coming soon. It needs a server for the conversion (LibreOffice, OCR or AI), which this browser-only version does not have.</p><button class="sec" onclick="location.hash=''">Back</button></div>`;return}
+ if(!t.op){app.innerHTML=`<div class="panel"><h2 style="margin-top:0">${t.icon} ${t.name}</h2><p>This tool is coming soon.</p><button class="sec" onclick="location.hash=''">Back</button></div>`;return}
  const [k]=t.op.split(":");
  let opt="";
+ if(k==="conv")opt=`<label>Convert to<select id="o"><option value="">Choose a file first</option></select></label>`;
  if(k==="api")opt=`<p style="color:var(--mut);font-size:13px">This tool uploads your file to the server for conversion. It is deleted right after.</p>`;
  if(k==="compress")opt=`<label>Quality<select id="o"><option value="0.7">Balanced</option><option value="0.5">Smaller</option><option value="0.35">Smallest</option></select></label><p style="color:var(--mut);font-size:13px">Pages are turned into images, so text will not stay selectable.</p>`;
  if(k==="split")opt=`<label>Ranges, one file per range<input type="text" id="o" placeholder="1-3, 4, 5-8"></label>`;
@@ -111,6 +113,7 @@ function route(){
  dz.ondragover=e=>{e.preventDefault();dz.classList.add("on")};dz.ondragleave=()=>dz.classList.remove("on");
  dz.ondrop=e=>{e.preventDefault();dz.classList.remove("on");add(e.dataTransfer.files,t)};
  $("#rs").onclick=route;$("#go").onclick=()=>run(t);
+ if(pend){const f=pend;pend=null;add([f],t)}
 }
 function add(fl,t){
  const ok=t.acc.split(",");let bad=0;
@@ -120,6 +123,7 @@ function add(fl,t){
  if(bad)msg("Some files were skipped: this tool accepts "+t.acc.replace(/,/g,", ")+" only.",1);else if(files.length)msg("");
  $("#fl").innerHTML=files.map(f=>`<li><span>${f.name}</span><span>${(f.size/1024).toFixed(0)} KB</span></li>`).join("");
  $("#go").disabled=!files.length;
+ if(t.op==="conv"&&files.length){const e="."+files[0].name.split(".").pop().toLowerCase();$("#o").innerHTML=(CONV[e]||[]).map(x=>`<option value="${x[0]}">${x[1]}</option>`).join("")}
 }
 function msg(t,e){const m=$("#msg");m.className=e?"err":"ok";m.textContent=t}
 function parse(s,n,keepOrder){
@@ -142,6 +146,7 @@ async function render(f,scale,type,q,cb){
   await pg.render({canvasContext:x,viewport:vp}).promise;await cb(i,await canvasBlob(c,type,q),c,vp);prog(i/pdf.numPages)}
 }
 async function run(t){
+ if(t.op==="conv"){pend=files[0];location.hash=$("#o").value;return}
  const [k,arg]=t.op.split(":"),o=($("#o")||{}).value;results=[];$("#res").innerHTML="";$("#go").disabled=true;msg("Working…");prog(0);
  try{
   if(k==="api"){const fd=new FormData();fd.append("file",files[0]);const r=await fetch("/api/convert/"+t.id,{method:"POST",body:fd});
