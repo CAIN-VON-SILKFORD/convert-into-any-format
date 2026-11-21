@@ -45,13 +45,14 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:20px}footer a{c
 <main id="app"></main>
 <footer>Many tools run in your browser. Tools that use the server delete your file right after. <a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#contact">Contact</a></footer>
 <script src="/tools.js"></script>
+<script src="/more.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 const {PDFDocument,degrees,rgb,StandardFonts}=PDFLib;
 const PDF=".pdf",IMG=".jpg,.jpeg,.png,.webp",DOC=".doc,.docx",XLS=".xls,.xlsx",PPT=".ppt,.pptx";
 const T=[
 ["Compress","🗜️",[["compress","Compress PDF","Shrink file size",PDF,0,"opt:quality"]]],
-["Convert","🔄",[["converter","PDF Converter","Pick a file, then a format",".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.jpg,.jpeg,.png,.webp",0,"conv"],["ocr","PDF OCR","Make scans searchable"],["pdfa","PDF to PDF/A","Archive format"]]],
+["Convert","🔄",[["converter","PDF Converter","Pick a file, then a format",".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.jpg,.jpeg,.png,.webp",0,"conv"],["ocr","PDF OCR","Make scans searchable",PDF,0,"ocr"],["pdfa","PDF to PDF/A","Archive format",PDF,0,"api"]]],
 ["PDF to Image","🖼️",[["pdf-to-jpg","PDF to JPG","Pages as JPG",PDF,0,"img:jpeg"],["pdf-to-png","PDF to PNG","Pages as PNG",PDF,0,"img:png"]]],
 ["Image to PDF","📷",[["jpg-to-pdf","JPG to PDF","JPG, PNG, WebP to PDF",IMG,1,"pdf-from-img"]]],
 ["PDF to Office","📄",[["pdf-to-word","PDF to Word","Editable .docx",PDF,0,"api"],["pdf-to-excel","PDF to Excel","Tables to .xlsx",PDF,0,"api"],["pdf-to-ppt","PDF to PPT","Slides",PDF,0,"api"]]],
@@ -59,9 +60,9 @@ const T=[
 ["OpenOffice to PDF","📑",[["odt-to-pdf","ODT to PDF","OpenDocument text",".odt",0,"api"],["ods-to-pdf","ODS to PDF","OpenDocument sheet",".ods",0,"api"],["odp-to-pdf","ODP to PDF","OpenDocument slides",".odp",0,"api"]]],
 ["Organize","🗂️",[["merge","Merge PDF","Combine files",PDF,1,"merge"],["split","Split PDF","By page ranges",PDF,0,"split"],["rotate","Rotate PDF","Turn all pages",PDF,0,"rotate"],["delete","Delete PDF Pages","Remove pages",PDF,0,"delete"],["extract","Extract PDF Pages","Keep chosen pages",PDF,0,"extract"],["organize","Organize PDF","Reorder pages",PDF,0,"reorder"]]],
 ["Edit","✏️",[["edit","Edit PDF","Add text, cover areas",PDF,0,"edit"],["annotator","PDF Annotator","Highlight, add notes",PDF,0,"annotate"],["reader","PDF Reader","View online",PDF,0,"reader"],["number","Number Pages","Add page numbers",PDF,0,"number"],["crop","Crop PDF","Trim margins",PDF,0,"crop"],["redact","Redact PDF","Hide text for good",PDF,0,"redact"],["watermark","Watermark PDF","Stamp text",PDF,0,"watermark"],["formfiller","PDF Form Filler","Fill forms",PDF,0,"formfill"],["share","Share PDF","Link valid for 1 hour",PDF,0,"share"]]],
-["Fill & Sign","✍️",[["sign","Sign PDF","Draw or type",PDF,0,"sign"],["request","Request Signatures","Send to others"]]],
+["Fill & Sign","✍️",[["sign","Sign PDF","Draw or type",PDF,0,"sign"],["request","Request Signatures","Send to others",PDF,0,"signreq"]]],
 ["Protect","🔒",[["unlock","Unlock PDF","Remove password",PDF,0,"api"],["protect","Protect PDF","Add password",PDF,0,"api"]]],
-["More tools","➕",[["repair","Repair PDF","Fix broken files",PDF,0,"repair"],["compare","Compare PDF","Spot differences",PDF,1,"compare"],["flatten","Flatten PDF","Lock form fields",PDF,0,"flatten"],["metadata","Edit Metadata","Title, author",PDF,0,"metadata"],["pdf-to-txt","PDF to Text","Extract text",PDF,0,"text"],["html-to-pdf","HTML to PDF","Web pages",".html,.htm",0,"api"],["txt-to-pdf","TXT to PDF","Plain text",".txt",0,"api"],["csv-to-excel","CSV to Excel","Spreadsheets",".csv",0,"api"],["pdf-to-epub","PDF to EPUB","E-books",PDF,0,"api"],["image-conv","Image Converter","JPG, PNG, WebP, GIF, BMP",".jpg,.jpeg,.png,.webp,.gif,.bmp",1,"imgconv"],["media","Audio and Video","MP3, WAV, MP4, GIF",".mp3,.wav,.ogg,.m4a,.aac,.flac,.wma,.mp4,.mov,.avi,.mkv,.webm,.gif",0,"api"],["summarize","Summarize PDF","AI"],["chat","Chat with PDF","AI"],["translate","Translate PDF","AI"],["scan","Scan to PDF","Use camera or photos",IMG,1,"pdf-from-img"]]]
+["More tools","➕",[["repair","Repair PDF","Fix broken files",PDF,0,"repair"],["compare","Compare PDF","Spot differences",PDF,1,"compare"],["flatten","Flatten PDF","Lock form fields",PDF,0,"flatten"],["metadata","Edit Metadata","Title, author",PDF,0,"metadata"],["pdf-to-txt","PDF to Text","Extract text",PDF,0,"text"],["html-to-pdf","HTML to PDF","Web pages",".html,.htm",0,"api"],["txt-to-pdf","TXT to PDF","Plain text",".txt",0,"api"],["csv-to-excel","CSV to Excel","Spreadsheets",".csv",0,"api"],["pdf-to-epub","PDF to EPUB","E-books",PDF,0,"api"],["epub-to-pdf","EPUB to PDF","E-books",".epub",0,"api"],["image-conv","Image Converter","JPG, PNG, WebP, GIF, BMP",".jpg,.jpeg,.png,.webp,.gif,.bmp",1,"imgconv"],["media","Audio and Video","MP3, WAV, MP4, GIF",".mp3,.wav,.ogg,.m4a,.aac,.flac,.wma,.mp4,.mov,.avi,.mkv,.webm,.gif",0,"api"],["summarize","Summarize PDF","AI summary",PDF,0,"summarize"],["chat","Chat with PDF","Ask questions",PDF,0,"chat"],["translate","Translate PDF","AI translation",PDF,0,"translate"],["scan","Scan to PDF","Use camera or photos",IMG,1,"pdf-from-img"]]]
 ];
 const tools={};T.forEach(([c,i,l])=>l.forEach(t=>tools[t[0]]={id:t[0],name:t[1],d:t[2],acc:t[3],multi:t[4],op:t[5],cat:c,icon:i}));
 const $=s=>document.querySelector(s),app=$("#app");
@@ -88,9 +89,11 @@ function page(txt){app.innerHTML=`<div class="panel"><h2 style="margin-top:0">${
 function route(){
  files=[];results=[];const id=location.hash.slice(1);
  if(!id)return home();
- if(id==="privacy")return page(["Privacy","Many tools run locally in your browser. Tools marked as using the server (Word, PowerPoint, Excel, EPUB, OpenOffice, HTML, TXT, CSV, Protect, Unlock, audio and video) upload your file, which is deleted right after conversion and within 1 hour at the latest. Share PDF keeps your file for 1 hour so the link works, then deletes it."]);
+ if(id==="privacy")return page(["Privacy","Many tools run locally in your browser. Tools that use the server (Word, PowerPoint, Excel, EPUB, PDF/A, OpenOffice, HTML, TXT, CSV, Protect, Unlock, audio and video) upload your file, which is deleted right after conversion and within 1 hour at the latest. Share PDF keeps your file for up to 1 hour, and signature requests for up to 24 hours, so the links work; then they are deleted. The AI tools send only the text of your PDF to an AI service."]);
  if(id==="terms")return page(["Terms","Free to use, provided as is, with no warranty."]);
  if(id==="contact")return page(["Contact","Add your contact email here."]);
+ if(id.startsWith("sign/"))return signView(id.slice(5));
+ if(id.startsWith("signed/"))return signedView(id.slice(7));
  const t=tools[id];if(!t)return home();
  if(!t.op){app.innerHTML=`<div class="panel"><h2 style="margin-top:0">${t.icon} ${t.name}</h2><p>This tool is coming soon.</p><button class="sec" onclick="location.hash=''">Back</button></div>`;return}
  const [k]=t.op.split(":");
